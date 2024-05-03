@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notes</title>
+  <link rel="icon" type="image/x-icon" href="Notes.png">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .note {
+      cursor: pointer;
+      border-radius: 10px;
+      transition: opacity 0.5s ease-in-out;
+      font-family: "Lato";
+      font-size: 24px;
+    }
+
+    .note.fade-out {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-5">
+  <h1 class="mb-4">Notes</h1>
+  <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addNoteModal">
+    Add Note
+  </button>
+
+  <!-- Add Note Modal -->
+  <div class="modal fade" id="addNoteModal" tabindex="-1" role="dialog" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addNoteModalLabel">Add Note</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <textarea id="noteText" class="form-control" rows="3" placeholder="Enter your note"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="addNote()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes Display -->
+  <div id="notesContainer"></div>
+</div>
+
+<!-- Note Edit Modal -->
+<div class="modal fade" id="editNoteModal" tabindex="-1" role="dialog" aria-labelledby="editNoteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editNoteModalLabel">Edit Note</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea id="editedNoteText" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" onclick="deleteNote()">Delete</button>
+        <button type="button" class="btn btn-primary" onclick="updateNote()">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load notes from localStorage on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    loadNotes();
+  });
+
+  // Function to add a new note
+  function addNote() {
+    var noteText = document.getElementById('noteText').value;
+
+    if (noteText.trim() === "") {
+      alert("Please enter a note!");
+      return;
+    }
+
+    var notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes.unshift(noteText);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes();
+    $('#addNoteModal').modal('hide');
+    document.getElementById('noteText').value = "";
+  }
+
+  // Function to load notes into the page
+  function loadNotes() {
+    var notes = JSON.parse(localStorage.getItem('notes')) || [];
+    var notesContainer = document.getElementById('notesContainer');
+    notesContainer.innerHTML = "";
+
+    notes.forEach(function(note, index) {
+      var noteDiv = document.createElement('div');
+      noteDiv.classList.add('note', 'alert', 'alert-primary');
+      noteDiv.textContent = note;
+      noteDiv.setAttribute('data-index', index);
+      noteDiv.setAttribute('data-toggle', 'modal');
+      noteDiv.setAttribute('data-target', '#editNoteModal');
+      notesContainer.appendChild(noteDiv);
+    });
+  }
+
+  // Function to edit a note
+  function editNote() {
+    var index = this.getAttribute('data-index');
+    var notes = JSON.parse(localStorage.getItem('notes')) || [];
+    var noteText = notes[index];
+    document.getElementById('editedNoteText').value = noteText;
+    document.getElementById('editNoteModal').setAttribute('data-index', index);
+  }
+
+  // Function to update a note
+  function updateNote() {
+    var index = document.getElementById('editNoteModal').getAttribute('data-index');
+    var notes = JSON.parse(localStorage.getItem('notes')) || [];
+    var editedNoteText = document.getElementById('editedNoteText').value;
+    notes[index] = editedNoteText;
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes();
+    $('#editNoteModal').modal('hide');
+  }
+
+  // Function to delete a note
+  function deleteNote() {
+    var index = document.getElementById('editNoteModal').getAttribute('data-index');
+    var notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes.splice(index, 1);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    var noteToDelete = document.querySelector(`.note[data-index='${index}']`);
+    noteToDelete.classList.add('fade-out');
+    setTimeout(function() {
+      loadNotes();
+    }, 500);
+    $('#editNoteModal').modal('hide');
+  }
+
+  // Add event listeners to all existing notes
+  document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('note')) {
+      editNote.call(event.target);
+    }
+  });
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
