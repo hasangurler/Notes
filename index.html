@@ -4,19 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notes</title>
-  <link rel="icon" type="image/x-icon" href="Notes.png">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
     .note {
       cursor: pointer;
       border-radius: 10px;
-      transition: opacity 0.5s ease-in-out;
-      font-family: "Lato";
-      font-size: 16px;
+      margin-bottom: 10px;
     }
-
-    .note.fade-out {
-      opacity: 0;
+    #drawingCanvas {
+      border: 1px solid #000;
+      margin-bottom: 10px;
+      display: block;
+      margin: 0 auto;
+    }
+    #editedDrawingCanvas {
+      border: 1px solid #000;
+      margin-bottom: 10px;
+      display: block;
+      margin: 0 auto;
     }
   </style>
 </head>
@@ -26,6 +31,9 @@
   <h1 class="mb-4">Notes</h1>
   <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addNoteModal">
     Add Note
+  </button>
+  <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#drawModal">
+    Draw
   </button>
 
   <!-- Add Note Modal -->
@@ -44,6 +52,31 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
           <button type="button" class="btn btn-primary" onclick="addNote()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Draw Modal -->
+  <div class="modal fade" id="drawModal" tabindex="-1" role="dialog" aria-labelledby="drawModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="drawModalLabel">Draw</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <canvas id="drawingCanvas" width="400" height="300"></canvas>
+          <div class="form-group">
+            <label for="colorSelect">Select Color:</label>
+            <input type="color" id="colorSelect" class="form-control">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="cancelDrawing()">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="addDrawing()">Add</button>
         </div>
       </div>
     </div>
@@ -75,86 +108,409 @@
   </div>
 </div>
 
+<!-- Draw Edit Modal -->
+<div class="modal fade" id="editDrawModal" tabindex="-1" role="dialog" aria-labelledby="editDrawModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editDrawModalLabel">Edit Drawing</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <canvas id="editedDrawingCanvas" width="400" height="300"></canvas>
+        <div class="form-group">
+          <label for="colorSelectEdit">Select Color:</label>
+          <input type="color" id="colorSelectEdit" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" onclick="deleteDrawing()">Delete</button>
+        <button type="button" class="btn btn-primary" id="updateButton" onclick="updateDrawing()">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // Load notes from localStorage on page load
-  document.addEventListener("DOMContentLoaded", function() {
-    loadNotes();
+  let drawingCanvas = document.getElementById('drawingCanvas');
+  let drawingContext = drawingCanvas.getContext('2d');
+  let colorSelect = document.getElementById('colorSelect');
+
+  let editedDrawingCanvas = document.getElementById('editedDrawingCanvas');
+  let editedDrawingContext = editedDrawingCanvas.getContext('2d');
+  let colorSelectEdit = document.getElementById('colorSelectEdit');
+
+  let drawingData = [];
+  let isDrawing = false;
+  let firstPoint = false;
+  let pointColor = 'black';
+  let currentColor = 'black';
+
+  // Initialize drawing canvas
+  function initializeDrawingCanvas() {
+    drawingContext.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    drawingContext.lineWidth = 3;
+    drawingContext.lineCap = 'round';
+    drawingContext.lineJoin = 'round';
+    drawingContext.strokeStyle = colorSelect.value;
+    drawingData = [];
+  }
+
+  // Function to initialize the edited drawing canvas
+  function initializeEditedDrawingCanvas() {
+    editedDrawingContext.clearRect(0, 0, editedDrawingCanvas.width, editedDrawingCanvas.height);
+    editedDrawingContext.lineWidth = 3;
+    editedDrawingContext.lineCap = 'round';
+    editedDrawingContext.lineJoin = 'round';
+    editedDrawingContext.strokeStyle = colorSelectEdit.value;
+  }
+
+  // Event listener for color select change
+  colorSelect.addEventListener('change', function() {
+    drawingContext.strokeStyle = colorSelect.value;
   });
+
+  // Event listener for color select edit change
+  colorSelectEdit.addEventListener('change', function() {
+    editedDrawingContext.strokeStyle = colorSelectEdit.value;
+  });
+
+  // Function to load notes into the page
+  function loadNotes() {
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    let notesContainer = document.getElementById('notesContainer');
+    notesContainer.innerHTML = "";
+
+    notes.forEach(function(note, index) {
+      let noteDiv = document.createElement('div');
+      noteDiv.classList.add('note', 'alert', 'alert-primary');
+
+      // Create a unique ID for the note
+      let messageId = 'message-' + index;
+      noteDiv.id = messageId;
+
+      if (note.type === 'text') {
+        noteDiv.textContent = note.text;
+        noteDiv.addEventListener('click', function() {
+          openEditNoteModal(index, note.text);
+        });
+      }
+      else if (note.type === 'drawing') {
+        var drawing = displayDrawing(index, note.data, note.color);
+        noteDiv.appendChild(drawing);
+      }
+
+      notesContainer.appendChild(noteDiv);
+    });
+  }
+
+  // Function to open draw modal
+  function openDrawModal() {
+      $('#drawModal').modal('show');
+      initializeDrawingCanvas(); // Reset the drawing canvas
+  }
+
+  // Function to handle drawing start
+  function startDrawing(event) {
+    isDrawing = true;
+    let canvasRect = drawingCanvas.getBoundingClientRect();
+    let x = event.clientX || event.touches[0].clientX;
+    let y = event.clientY || event.touches[0].clientY;
+    x -= canvasRect.left;
+    y -= canvasRect.top;
+    drawingContext.beginPath();
+    drawingContext.moveTo(x, y);
+    drawingData.push({ x: x, y: y, firstPoint: true, pointColor: colorSelect.value });
+    drawingCanvas.addEventListener('mousemove', draw);
+    drawingCanvas.addEventListener('touchmove', draw);
+    drawingCanvas.addEventListener('mouseup', stopDrawing);
+    drawingCanvas.addEventListener('touchend', stopDrawing);
+  }
+
+  // Function to draw lines
+  function draw(event) {
+    if (!isDrawing) return;
+    const canvasRect = drawingCanvas.getBoundingClientRect();
+    let x = event.clientX || event.touches[0].clientX;
+    let y = event.clientY || event.touches[0].clientY;
+    x -= canvasRect.left;
+    y -= canvasRect.top;
+    
+    drawingContext.lineTo(x, y);
+    drawingContext.stroke();
+
+    drawingData.push({ x: x, y: y, firstPoint: false, pointColor: colorSelect.value });
+  }
+
+  // Function to stop drawing
+  function stopDrawing() {
+    if (!isDrawing) return;
+    isDrawing = false;
+    drawingCanvas.removeEventListener('mousemove', draw);
+    drawingCanvas.removeEventListener('touchmove', draw);
+    drawingCanvas.removeEventListener('mouseup', stopDrawing);
+    drawingCanvas.removeEventListener('touchend', stopDrawing);
+  }
+
+  // Function to add a new drawing note
+  function addDrawing() {
+      let notes = JSON.parse(localStorage.getItem('notes')) || [];
+      let index = notes.length; // Index for the new message
+      
+      notes.unshift({ type: 'drawing', data: drawingData, color: colorSelect.value });
+      localStorage.setItem('notes', JSON.stringify(notes));
+      loadNotes(); // Reload notes to update the UI
+
+      // Hide the draw modal and reset drawing canvas
+      $('#drawModal').modal('hide');
+      initializeDrawingCanvas();
+
+      // Initialize drawingData array
+      drawingData = [];
+  }
+
+  function cancelDrawing() {
+    // Hide the draw modal and reset drawing canvas
+    $('#drawModal').modal('hide');
+    initializeDrawingCanvas();
+
+    // Initialize drawingData array
+    drawingData = [];
+  }
+
+  // Function to update a drawing note
+  function updateDrawing(index) {
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    let updatedDrawingData = [];
+    const canvasRect = editedDrawingCanvas.getBoundingClientRect();
+
+    drawingData.forEach(function(point) {
+      let px = point.x;
+      let py = point.y;
+      let firstPoint = point.firstPoint;
+      let pointColor = point.pointColor;
+      updatedDrawingData.push({ x: px, y: py, firstPoint: firstPoint, pointColor: pointColor });
+    });
+
+    notes[index] = { type: 'drawing', data: updatedDrawingData, color: colorSelectEdit.value };
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes();
+
+    // Hide the draw modal and reset drawing canvas
+    $('#drawModal').modal('hide');
+    initializeDrawingCanvas();
+  }
+
+  // Function to display a drawing note
+  function displayDrawing(index, data, color) {
+    let canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 300;
+
+    let context = canvas.getContext('2d');
+    context.lineWidth = 3;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    
+    if (Array.isArray(data)) {
+      data.forEach(function(point) {
+        let x = point.x;
+        let y = point.y;
+        let firstPoint = point.firstPoint;
+        let pointColor = point.pointColor;
+
+        if (firstPoint === true) {
+          context.strokeStyle = pointColor;
+          context.beginPath();
+          context.moveTo(x, y);
+        } 
+        else {
+          context.lineTo(x, y);
+          context.stroke();
+        }
+      });
+    }
+    else {
+        console.log('Data is not an array:', data);
+    }
+
+    canvas.addEventListener('click', function() {
+      openEditDrawModal(index, data, color);
+    });
+
+    return canvas;
+  }
+
+  // Function to open edit draw modal
+  function openEditDrawModal(index, data, color) {
+      $('#editDrawModal').modal('show');
+      initializeEditedDrawingCanvas();
+      drawingData = Array.from(data); // Reset drawingData to the data of the selected drawing note
+      colorSelectEdit.value = color;
+      const canvasRect = editedDrawingCanvas.getBoundingClientRect();
+
+      drawingData.forEach(function(point) {
+          point.x -= canvasRect.left;
+          point.y -= canvasRect.top;
+      });
+
+      drawEditedDrawing();
+
+      // Attach event listeners for drawing
+      editedDrawingCanvas.addEventListener('mousedown', startEditingDrawing);
+      editedDrawingCanvas.addEventListener('touchstart', startEditingDrawing);
+
+      // Set the index attribute
+      document.getElementById('editDrawModal').setAttribute('data-index', index);
+
+      // Pass index to updateDrawing function
+      document.getElementById('updateButton').onclick = function() {
+          updateDrawing(index);
+          $('#editDrawModal').modal('hide');
+      };
+  }
+
+  // Function to draw the edited drawing on the canvas
+  function drawEditedDrawing() {
+    editedDrawingContext.clearRect(0, 0, editedDrawingCanvas.width, editedDrawingCanvas.height);
+    editedDrawingContext.lineWidth = 3;
+    editedDrawingContext.lineCap = 'round';
+    editedDrawingContext.lineJoin = 'round';
+    
+    drawingData.forEach(function(point) {
+      if (point.firstPoint === true) {
+        editedDrawingContext.strokeStyle = point.pointColor;
+        editedDrawingContext.beginPath();
+        editedDrawingContext.moveTo(point.x, point.y);
+      } 
+      else {
+        editedDrawingContext.lineTo(point.x, point.y);
+        editedDrawingContext.stroke();
+      }
+    });
+  }
+
+  // Function to start editing drawing
+  function startEditingDrawing(event) {
+    isDrawing = true;
+    let canvasRect = editedDrawingCanvas.getBoundingClientRect();
+    let x = event.clientX || event.touches[0].clientX;
+    let y = event.clientY || event.touches[0].clientY;
+    x -= canvasRect.left;
+    y -= canvasRect.top;
+    drawingData.push({ x: x, y: y, firstPoint: true, pointColor: colorSelectEdit.value });
+    editedDrawingContext.beginPath();
+    editedDrawingContext.moveTo(x, y);
+    editedDrawingCanvas.addEventListener('mousemove', continueEditingDrawing);
+    editedDrawingCanvas.addEventListener('touchmove', continueEditingDrawing);
+    editedDrawingCanvas.addEventListener('mouseup', stopEditingDrawing);
+    editedDrawingCanvas.addEventListener('touchend', stopEditingDrawing);
+  }
+
+  // Function to continue editing drawing
+  function continueEditingDrawing(event) {
+    if (!isDrawing) return;
+    const canvasRect = editedDrawingCanvas.getBoundingClientRect();
+    let x = event.clientX || event.touches[0].clientX;
+    let y = event.clientY || event.touches[0].clientY;
+    x -= canvasRect.left;
+    y -= canvasRect.top;
+    
+    editedDrawingContext.lineTo(x, y);
+    editedDrawingContext.stroke();
+
+    drawingData.push({ x: x, y: y, firstPoint: false, pointColor: colorSelectEdit.value });
+  }
+
+  // Function to stop editing drawing
+  function stopEditingDrawing() {
+    isDrawing = false;
+    editedDrawingCanvas.removeEventListener('mousemove', continueEditingDrawing);
+    editedDrawingCanvas.removeEventListener('touchmove', continueEditingDrawing);
+    editedDrawingCanvas.removeEventListener('mouseup', stopEditingDrawing);
+    editedDrawingCanvas.removeEventListener('touchend', stopEditingDrawing);
+  }
+
+  // Function to delete a drawing note
+  function deleteDrawing() {
+      const editDrawModal = document.getElementById('editDrawModal');
+
+      if (editDrawModal) {
+          const index = editDrawModal.getAttribute('data-index');
+          let notes = JSON.parse(localStorage.getItem('notes')) || [];
+          notes.splice(index, 1);
+          localStorage.setItem('notes', JSON.stringify(notes));
+          loadNotes();
+          $('#editDrawModal').modal('hide');
+      } 
+      else {
+          console.error("editDrawModal is null. Cannot delete drawing note.");
+      }
+
+      // Reset drawingData after deleting the drawing note
+      drawingData = [];
+  }
 
   // Function to add a new note
   function addNote() {
-    var noteText = document.getElementById('noteText').value;
+    let noteText = document.getElementById('noteText').value;
 
     if (noteText.trim() === "") {
       alert("Please enter a note!");
       return;
     }
 
-    var notes = JSON.parse(localStorage.getItem('notes')) || [];
-    notes.unshift(noteText);
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes.unshift({ type: 'text', text: noteText });
     localStorage.setItem('notes', JSON.stringify(notes));
     loadNotes();
     $('#addNoteModal').modal('hide');
     document.getElementById('noteText').value = "";
   }
 
-  // Function to load notes into the page
-  function loadNotes() {
-    var notes = JSON.parse(localStorage.getItem('notes')) || [];
-    var notesContainer = document.getElementById('notesContainer');
-    notesContainer.innerHTML = "";
-
-    notes.forEach(function(note, index) {
-      var noteDiv = document.createElement('div');
-      noteDiv.classList.add('note', 'alert', 'alert-primary');
-      noteDiv.textContent = note;
-      noteDiv.setAttribute('data-index', index);
-      noteDiv.setAttribute('data-toggle', 'modal');
-      noteDiv.setAttribute('data-target', '#editNoteModal');
-      notesContainer.appendChild(noteDiv);
-    });
-  }
-
-  // Function to edit a note
-  function editNote() {
-    var index = this.getAttribute('data-index');
-    var notes = JSON.parse(localStorage.getItem('notes')) || [];
-    var noteText = notes[index];
-    document.getElementById('editedNoteText').value = noteText;
+  // Function to open edit note modal
+  function openEditNoteModal(index, text) {
+    document.getElementById('editedNoteText').value = text;
     document.getElementById('editNoteModal').setAttribute('data-index', index);
+    $('#editNoteModal').modal('show');
   }
 
-  // Function to update a note
+  // Function to update a text note
   function updateNote() {
-    var index = document.getElementById('editNoteModal').getAttribute('data-index');
-    var notes = JSON.parse(localStorage.getItem('notes')) || [];
-    var editedNoteText = document.getElementById('editedNoteText').value;
-    notes[index] = editedNoteText;
+    let index = document.getElementById('editNoteModal').getAttribute('data-index');
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    let editedNoteText = document.getElementById('editedNoteText').value;
+    notes[index] = { type: 'text', text: editedNoteText };
     localStorage.setItem('notes', JSON.stringify(notes));
     loadNotes();
     $('#editNoteModal').modal('hide');
   }
 
-  // Function to delete a note
+  // Function to delete a text note
   function deleteNote() {
-    var index = document.getElementById('editNoteModal').getAttribute('data-index');
-    var notes = JSON.parse(localStorage.getItem('notes')) || [];
+    let index = document.getElementById('editNoteModal').getAttribute('data-index');
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
     notes.splice(index, 1);
     localStorage.setItem('notes', JSON.stringify(notes));
-    var noteToDelete = document.querySelector(`.note[data-index='${index}']`);
-    noteToDelete.classList.add('fade-out');
-    setTimeout(function() {
-      loadNotes();
-    }, 500);
+    loadNotes();
     $('#editNoteModal').modal('hide');
   }
 
-  // Add event listeners to all existing notes
-  document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('note')) {
-      editNote.call(event.target);
-    }
+  // Add event listener to drawing canvas
+  drawingCanvas.addEventListener('mousedown', startDrawing);
+  drawingCanvas.addEventListener('touchstart', startDrawing);
+
+  // Initialize drawing canvas
+  initializeDrawingCanvas();
+
+  // Load notes from localStorage on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    loadNotes();
   });
+
 </script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
