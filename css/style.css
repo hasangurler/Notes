@@ -1,1 +1,1004 @@
+/* =========================================================
+   ROOT
+========================================================= */
 
+:root {
+
+    --app-bg: #f4f6f9;
+
+    --surface: #ffffff;
+
+    --surface-secondary: #f8f9fa;
+
+    --border: #e9ecef;
+
+    --text: #212529;
+
+    --text-secondary: #6c757d;
+
+    --card-radius: 14px;
+
+    --shadow:
+      0 1px 3px rgba(0, 0, 0, 0.035);
+
+    --shadow-hover:
+     0 3px 8px rgba(0, 0, 0, 0.055);
+}
+
+
+/* =========================================================
+   DARK THEME
+========================================================= */
+
+[data-theme="dark"] {
+
+    --app-bg: #181a1b;
+
+    --surface: #242628;
+
+    --surface-secondary: #2c2f31;
+
+    --border: #3d4145;
+
+    --text: #f1f3f5;
+
+    --text-secondary: #adb5bd;
+
+    --shadow:
+        0 4px 18px rgba(0, 0, 0, 0.25);
+
+    --shadow-hover:
+        0 10px 28px rgba(0, 0, 0, 0.40);
+}
+
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+
+    background-color: var(--app-bg);
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.app-header {
+
+    background-color: var(--surface);
+
+    border-bottom:
+        1px solid var(--border);
+
+    padding: 18px 0;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.header-top {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.app-brand {
+
+    min-width: 0;
+}
+
+
+.app-title {
+
+    margin: 0;
+
+    font-size: 1.5rem;
+
+    font-weight: 700;
+}
+
+
+.app-title i {
+
+    margin-right: 6px;
+}
+
+
+.app-subtitle {
+
+    color: var(--text-secondary);
+
+    font-size: 0.85rem;
+
+    margin-top: 3px;
+}
+
+
+.header-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.theme-button {
+
+    width: 42px;
+
+    height: 42px;
+
+    padding: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.btn-new-note {
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.toolbar {
+
+    display: flex;
+
+    gap: 12px;
+
+    margin-top: 18px;
+}
+
+
+.search-wrapper {
+
+    position: relative;
+
+    flex: 1;
+}
+
+
+.search-icon {
+
+    position: absolute;
+
+    left: 14px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--text-secondary);
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+
+.search-input {
+
+    padding-left: 40px;
+
+    padding-right: 42px;
+
+    background-color: var(--surface);
+
+    border-color: var(--border);
+
+    color: var(--text);
+}
+
+
+.search-input::placeholder {
+
+    color: var(--text-secondary);
+}
+
+
+.search-input:focus {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+}
+
+
+.search-clear {
+
+    position: absolute;
+
+    right: 10px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    padding: 4px;
+
+    z-index: 3;
+}
+
+
+.search-clear:hover {
+
+    color: var(--text);
+}
+
+
+.sort-wrapper {
+
+    width: 220px;
+}
+
+
+.sort-wrapper select {
+
+    background-color: var(--surface);
+
+    border-color: var(--border);
+
+    color: var(--text);
+}
+
+
+/* =========================================================
+   COUNTER
+========================================================= */
+
+.notes-counter {
+
+    color: var(--text-secondary);
+
+    font-size: 0.82rem;
+
+    margin-top: 9px;
+}
+
+
+/* =========================================================
+   NOTE CARD
+========================================================= */
+
+.note-card {
+
+    background-color: var(--surface);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--card-radius);
+
+    overflow: hidden;
+
+    height: 100%;
+
+    cursor: pointer;
+
+    box-shadow: var(--shadow);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.note-card:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: var(--shadow-hover);
+}
+
+
+.note-card:focus-visible {
+
+    outline:
+        3px solid rgba(13, 110, 253, 0.35);
+
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   CARD COLORS
+========================================================= */
+
+.note-card.color-yellow {
+
+    border-top:
+        5px solid #ffc107;
+}
+
+
+.note-card.color-green {
+
+    border-top:
+        5px solid #198754;
+}
+
+
+.note-card.color-blue {
+
+    border-top:
+        5px solid #0d6efd;
+}
+
+
+.note-card.color-purple {
+
+    border-top:
+        5px solid #6f42c1;
+}
+
+
+.note-card.color-red {
+
+    border-top:
+        5px solid #dc3545;
+}
+
+
+.note-card.color-default {
+
+    border-top:
+        5px solid #6c757d;
+}
+
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.note-card-header {
+
+    background-color: var(--surface);
+
+    padding: 16px 18px 12px;
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+
+.note-card-title {
+
+    font-size: 1.05rem;
+
+    font-weight: 700;
+
+    margin: 0;
+
+    color: var(--text);
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   CARD BODY
+========================================================= */
+
+.note-card-body {
+
+    background-color: var(--surface);
+
+    padding: 15px 18px;
+
+    min-height: 105px;
+}
+
+
+.note-card-text {
+
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    line-height: 1.5;
+
+    display: -webkit-box;
+
+    -webkit-box-orient: vertical;
+
+    -webkit-line-clamp: 3;
+
+    overflow: hidden;
+
+    white-space: pre-line;
+}
+
+
+/* =========================================================
+   CARD FOOTER
+========================================================= */
+
+.note-card-footer {
+
+    background-color: var(--surface);
+
+    padding: 12px 18px;
+
+    border-top:
+        1px solid var(--border);
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.note-card-date {
+
+    color: var(--text-secondary);
+
+    font-size: 0.75rem;
+}
+
+
+.note-card-open {
+
+    color: #0d6efd;
+
+    font-size: 0.8rem;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state {
+
+    background-color: var(--surface);
+
+    border:
+        1px dashed var(--border);
+
+    border-radius: 14px;
+
+    text-align: center;
+
+    padding: 60px 20px;
+
+    color: var(--text-secondary);
+}
+
+
+.empty-state i {
+
+    display: block;
+
+    font-size: 4rem;
+
+    margin-bottom: 15px;
+}
+
+
+.empty-state h3 {
+
+    color: var(--text);
+
+    margin-bottom: 8px;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-content {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+
+    border: 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+}
+
+
+.modal-header {
+
+    background-color: var(--surface-secondary);
+
+    border-bottom-color: var(--border);
+}
+
+
+.modal-footer {
+
+    border-top-color: var(--border);
+
+    flex-wrap: wrap;
+}
+
+
+.form-label {
+
+    color: var(--text);
+}
+
+
+.form-control,
+.form-select {
+
+    background-color: var(--surface);
+
+    border-color: var(--border);
+
+    color: var(--text);
+}
+
+
+.form-control:focus,
+.form-select:focus {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+}
+
+
+.form-control::placeholder {
+
+    color: var(--text-secondary);
+}
+
+
+.btn-close {
+
+    filter: none;
+}
+
+
+[data-theme="dark"] .btn-close {
+
+    filter:
+        invert(1)
+        grayscale(100%)
+        brightness(200%);
+}
+
+
+/* =========================================================
+   FORM LABEL + COUNTER
+========================================================= */
+
+.form-label-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+
+.character-counter {
+
+    color: var(--text-secondary);
+
+    font-size: 0.75rem;
+}
+
+
+.character-counter.limit-near {
+
+    color: #fd7e14;
+}
+
+
+.character-counter.limit-reached {
+
+    color: #dc3545;
+
+    font-weight: 600;
+}
+
+
+.note-body-input {
+
+    resize: vertical;
+
+    min-height: 220px;
+}
+
+
+/* =========================================================
+   NOTE COLORS
+========================================================= */
+
+.note-colors {
+
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
+
+
+.color-option {
+
+    width: 32px;
+
+    height: 32px;
+
+    border-radius: 50%;
+
+    border:
+        2px solid transparent;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.color-option:hover {
+
+    transform: scale(1.1);
+}
+
+
+.color-option.active {
+
+    border-color: var(--text);
+
+    box-shadow:
+        0 0 0 2px var(--surface);
+}
+
+
+.color-default {
+
+    background: #6c757d;
+}
+
+
+.color-yellow {
+
+    background: #ffc107;
+}
+
+
+.color-green {
+
+    background: #198754;
+}
+
+
+.color-blue {
+
+    background: #0d6efd;
+}
+
+
+.color-purple {
+
+    background: #6f42c1;
+}
+
+
+.color-red {
+
+    background: #dc3545;
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+.note-date {
+
+    color: var(--text-secondary);
+
+    font-size: 0.8rem;
+}
+
+
+/* =========================================================
+   CONFIRMATION
+========================================================= */
+
+.confirmation-icon {
+
+    text-align: center;
+
+    font-size: 3rem;
+
+    color: #0d6efd;
+
+    margin-bottom: 15px;
+}
+
+
+.confirmation-message {
+
+    text-align: center;
+
+    margin: 0;
+
+    line-height: 1.6;
+}
+
+
+.confirmation-note-title {
+
+    font-weight: 700;
+
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 767.98px) {
+
+    .app-header {
+
+        position: relative;
+
+        padding: 14px 0;
+    }
+
+
+    .header-top {
+
+        gap: 10px;
+    }
+
+
+    .app-title {
+
+        font-size: 1.25rem;
+    }
+
+
+    .app-subtitle {
+
+        font-size: 0.75rem;
+    }
+
+
+    .toolbar {
+
+        flex-direction: column;
+    }
+
+
+    .sort-wrapper {
+
+        width: 100%;
+    }
+
+
+    .btn-new-note span {
+
+        display: none;
+    }
+
+
+    .btn-new-note {
+
+        width: 42px;
+
+        height: 42px;
+
+        padding: 0;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+    }
+
+
+    .btn-new-note i {
+
+        margin: 0;
+    }
+
+
+    .modal-footer {
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 8px;
+    }
+
+
+    .modal-footer button {
+
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 400px) {
+
+    .app-title {
+
+        font-size: 1.1rem;
+    }
+
+
+    .theme-button {
+
+        width: 38px;
+
+        height: 38px;
+    }
+
+
+    .btn-new-note {
+
+        width: 38px;
+
+        height: 38px;
+    }
+
+}
+
+/* =========================================================
+   DRAG & DROP
+========================================================= */
+
+.note-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.note-card-drag-handle {
+
+    flex:
+        0 0 auto;
+
+    width: 28px;
+
+    height: 28px;
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--text-secondary);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 6px;
+
+    cursor: grab;
+
+    touch-action: none;
+
+    transition:
+        color 0.15s ease,
+        background-color 0.15s ease;
+}
+
+
+.note-card-drag-handle:hover {
+
+    color: var(--text);
+
+    background-color:
+        var(--surface-secondary);
+}
+
+
+.note-card-drag-handle:active {
+
+    cursor: grabbing;
+}
+
+
+.note-card-title {
+
+    min-width: 0;
+
+    flex: 1;
+}
+
+
+.note-card-dragging {
+
+    opacity: 0.55;
+
+    transform:
+        scale(0.98);
+}
+
+
+.is-dragging {
+
+    user-select: none;
+}
+
+
+.is-dragging .note-card {
+
+    cursor: grabbing;
+}
+
+
+.drag-ready {
+
+    user-select: none;
+}
