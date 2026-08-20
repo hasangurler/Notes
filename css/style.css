@@ -1002,3 +1002,69 @@ body {
 
     user-select: none;
 }
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+
+    border:
+        1px solid var(--border);
+
+    box-shadow:
+        var(--shadow-hover);
+}
+
+
+.toast-header {
+
+    background-color: var(--surface-secondary);
+
+    color: var(--text);
+
+    border-bottom-color:
+        var(--border);
+}
+
+
+.toast-body {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+}
+
+
+[data-theme="dark"] .toast {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+
+    border-color: var(--border);
+}
+
+
+[data-theme="dark"] .toast-header {
+
+    background-color:
+        var(--surface-secondary);
+
+    color: var(--text);
+
+    border-bottom-color:
+        var(--border);
+}
+
+
+[data-theme="dark"] .toast-body {
+
+    background-color: var(--surface);
+
+    color: var(--text);
+}
