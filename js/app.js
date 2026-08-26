@@ -76,6 +76,8 @@ const btnTheme =
 const themeIcon =
     document.getElementById("themeIcon");
 
+const btnBackupNotes =
+    document.getElementById("btnBackupNotes");
 
 const btnNewNote =
     document.getElementById("btnNewNote");
@@ -225,6 +227,14 @@ function bindEvents() {
     btnTheme.addEventListener(
         "click",
         toggleTheme
+    );
+
+
+    /* Yedekleme */
+
+    btnBackupNotes.addEventListener(
+        "click",
+        backupNotes
     );
 
 
@@ -1751,6 +1761,101 @@ function showToast(
     toastElement.addEventListener(
         "hidden.bs.toast",
         () => toastElement.remove()
+    );
+}
+
+/* =========================================================
+   NOTLARI YEDEKLE
+========================================================= */
+
+function backupNotes() {
+
+    if (notes.length === 0) {
+
+        showToast(
+            "Yedeklenecek not bulunmuyor.",
+            "danger"
+        );
+
+        return;
+    }
+
+
+    /*
+     * Mevcut notes dizisini doğrudan
+     * JSON olarak yedekliyoruz.
+     *
+     * Böylece manuel sıralama da korunur.
+     */
+
+    const backupData =
+        JSON.stringify(
+            notes,
+            null,
+            2
+        );
+
+
+    const blob =
+        new Blob(
+            [backupData],
+            {
+                type:
+                    "application/json;charset=utf-8"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    const now =
+        new Date();
+
+
+    const date =
+        now.toISOString()
+            .slice(0, 10);
+
+
+    const time =
+        now.toTimeString()
+            .slice(0, 8)
+            .replaceAll(":", "-");
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        `notlarim-yedek-${date}-${time}.json`;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+
+    showToast(
+        `${notes.length} not başarıyla yedeklendi.`,
+        "success"
     );
 }
 
