@@ -1768,7 +1768,7 @@ function showToast(
    NOTLARI YEDEKLE
 ========================================================= */
 
-function backupNotes() {
+async function backupNotes() {
 
     if (notes.length === 0) {
 
@@ -1782,8 +1782,8 @@ function backupNotes() {
 
 
     /*
-     * Mevcut notes dizisini doğrudan
-     * JSON olarak yedekliyoruz.
+     * Mevcut notes dizisini JSON olarak
+     * yedekliyoruz.
      *
      * Böylece manuel sıralama da korunur.
      */
@@ -1795,6 +1795,115 @@ function backupNotes() {
             2
         );
 
+
+    const now =
+        new Date();
+
+
+    const date =
+        now.toISOString()
+            .slice(0, 10);
+
+
+    const time =
+        now.toTimeString()
+            .slice(0, 8)
+            .replaceAll(":", "-");
+
+
+    const fileName =
+        `notlarim-yedek-${date}-${time}.json`;
+
+
+    /*
+     * JSON dosyasını oluştur.
+     */
+
+    const file =
+        new File(
+            [backupData],
+            fileName,
+            {
+                type:
+                    "application/json"
+            }
+        );
+
+
+    /*
+     * =====================================================
+     * MOBİL / PWA
+     * =====================================================
+     *
+     * Android'in paylaşım ekranını kullan.
+     */
+
+    if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({
+            files: [file]
+        })
+    ) {
+
+        try {
+
+            await navigator.share({
+
+                title:
+                    "Notlarım Yedeği",
+
+                text:
+                    "Notlarım uygulamasının yedeği.",
+
+                files: [file]
+
+            });
+
+
+            showToast(
+                `${notes.length} not başarıyla yedeklendi.`,
+                "success"
+            );
+
+
+            return;
+
+        } catch (error) {
+
+            /*
+             * Kullanıcı paylaşım ekranını
+             * iptal ettiyse bunu hata olarak
+             * göstermiyoruz.
+             */
+
+            if (
+                error.name ===
+                "AbortError"
+            ) {
+
+                return;
+            }
+
+
+            console.error(
+                "Dosya paylaşımı başarısız:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * =====================================================
+     * MASAÜSTÜ / FALLBACK
+     * =====================================================
+     *
+     * Web Share API kullanılamıyorsa
+     * mevcut klasik indirme yöntemini kullan.
+     */
 
     const blob =
         new Blob(
@@ -1814,27 +1923,16 @@ function backupNotes() {
         document.createElement("a");
 
 
-    const now =
-        new Date();
-
-
-    const date =
-        now.toISOString()
-            .slice(0, 10);
-
-
-    const time =
-        now.toTimeString()
-            .slice(0, 8)
-            .replaceAll(":", "-");
-
-
     link.href =
         url;
 
 
     link.download =
-        `notlarim-yedek-${date}-${time}.json`;
+        fileName;
+
+
+    link.style.display =
+        "none";
 
 
     document.body.appendChild(
@@ -1845,11 +1943,23 @@ function backupNotes() {
     link.click();
 
 
-    link.remove();
+    /*
+     * Android / bazı tarayıcıların
+     * dosyayı başlatabilmesi için URL'yi
+     * hemen iptal etmiyoruz.
+     */
 
+    setTimeout(
+        () => {
 
-    URL.revokeObjectURL(
-        url
+            URL.revokeObjectURL(
+                url
+            );
+
+            link.remove();
+
+        },
+        1000
     );
 
 
