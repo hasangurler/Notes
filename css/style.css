@@ -860,31 +860,6 @@ body {
         margin: 0;
     }
 
-    .backup-button,
-    .restore-button {
-        width: 42px;
-        height: 42px;
-        min-width: 42px;
-        min-height: 42px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-    }
-
-    .backup-button i,
-    .restore-button i {
-        margin: 0;
-        line-height: 1;
-    }
-
-    .backup-button span,
-    .restore-button span {
-
-        display: none;
-    }
-
     .modal-footer {
 
         display: grid;
@@ -1055,4 +1030,74 @@ body {
     background-color: var(--surface);
 
     color: var(--text);
+}
+
+/* =========================================================
+   HEADER ACTION BUTTONS - MOBİLDE EŞİT BOYUT
+========================================================= */
+
+@media (max-width: 767.98px) {
+
+    .header-actions > button {
+
+        width: 42px !important;
+        height: 42px !important;
+
+        min-width: 42px !important;
+        max-width: 42px !important;
+
+        min-height: 42px !important;
+        max-height: 42px !important;
+
+        padding: 0 !important;
+
+        margin: 0 !important;
+
+        display: inline-flex !important;
+
+        align-items: center !important;
+        justify-content: center !important;
+
+        box-sizing: border-box !important;
+
+        flex: 0 0 42px !important;
+    }
+
+
+    .header-actions > button span {
+
+        display: none !important;
+    }
+
+
+    .header-actions > button i {
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        line-height: 1 !important;
+    }
+}
+
+
+/* =========================================================
+   ÇOK KÜÇÜK EKRAN
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .header-actions > button {
+
+        width: 38px !important;
+        height: 38px !important;
+
+        min-width: 38px !important;
+        max-width: 38px !important;
+
+        min-height: 38px !important;
+        max-height: 38px !important;
+
+        flex: 0 0 38px !important;
+    }
 }
