@@ -855,15 +855,13 @@ body {
         justify-content: center;
     }
 
-
     .btn-new-note i {
 
         margin: 0;
     }
 
-
     .backup-button,
-    .restote-button {
+    .restore-button {
         width: 42px;
         height: 42px;
         min-width: 42px;
@@ -905,28 +903,24 @@ body {
 
 
 @media (max-width: 400px) {
-
     .app-title {
-
         font-size: 1.1rem;
     }
 
-
-    .theme-button {
-
+    .theme-button,
+    .btn-new-note,
+    .backup-button,
+    .restore-button {
         width: 38px;
-
         height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
     }
-
-
-    .btn-new-note {
-
-        width: 38px;
-
-        height: 38px;
-    }
-
 }
 
 /* =========================================================
