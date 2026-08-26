@@ -862,7 +862,8 @@ body {
     }
 
 
-    .backup-button {
+    .backup-button,
+    .restote-button {
 
         width: 42px;
 
@@ -878,7 +879,8 @@ body {
     }
 
 
-    .backup-button span {
+    .backup-button span,
+    .restore-button span {
 
         display: none;
     }
