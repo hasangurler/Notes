@@ -864,20 +864,22 @@ body {
 
     .backup-button,
     .restote-button {
-
         width: 42px;
-
         height: 42px;
-
+        min-width: 42px;
+        min-height: 42px;
         padding: 0;
-
-        display: flex;
-
+        display: inline-flex;
         align-items: center;
-
         justify-content: center;
+        box-sizing: border-box;
     }
 
+    .backup-button i,
+    .restore-button i {
+        margin: 0;
+        line-height: 1;
+    }
 
     .backup-button span,
     .restore-button span {
