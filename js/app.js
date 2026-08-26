@@ -26,6 +26,7 @@ let currentNoteColor = "default";
 
 let pendingAction = null;
 
+let pendingRestoreNotes = null;
 
 /* =========================================================
    BOOTSTRAP
@@ -78,6 +79,12 @@ const themeIcon =
 
 const btnBackupNotes =
     document.getElementById("btnBackupNotes");
+
+const btnRestoreNotes =
+    document.getElementById("btnRestoreNotes");
+
+const restoreFileInput =
+    document.getElementById("restoreFileInput");
 
 const btnNewNote =
     document.getElementById("btnNewNote");
@@ -237,6 +244,17 @@ function bindEvents() {
         backupNotes
     );
 
+    /* Dosyadan geri yükleme */
+
+    btnRestoreNotes.addEventListener(
+        "click",
+        openRestoreFilePicker
+    );
+
+    restoreFileInput.addEventListener(
+        "change",
+        handleRestoreFile
+    );
 
     /* Form */
 
@@ -660,6 +678,146 @@ function renderNotes() {
     );
 }
 
+/* =========================================================
+   YEDEK VERİSİNİ DOĞRULA
+========================================================= */
+
+function validateBackupData(data) {
+
+    if (!Array.isArray(data)) {
+        return null;
+    }
+
+
+    const validNotes =
+        data.filter(note => {
+
+            if (
+                !note ||
+                typeof note !== "object"
+            ) {
+
+                return false;
+            }
+
+
+            if (
+                typeof note.id !== "string" ||
+                !note.id
+            ) {
+
+                return false;
+            }
+
+
+            if (
+                typeof note.title !== "string"
+            ) {
+
+                return false;
+            }
+
+
+            if (
+                typeof note.body !== "string"
+            ) {
+
+                return false;
+            }
+
+
+            return true;
+
+        });
+
+
+    if (
+        validNotes.length !==
+        data.length
+    ) {
+
+        return null;
+    }
+
+
+    /*
+     * Yedekteki notları normalize et.
+     */
+
+    return validNotes.map(note => ({
+
+        id:
+            note.id,
+
+        title:
+            note.title,
+
+        body:
+            note.body,
+
+        createdAt:
+            note.createdAt ||
+            new Date().toISOString(),
+
+        updatedAt:
+            note.updatedAt ||
+            note.createdAt ||
+            new Date().toISOString(),
+
+        color:
+            note.color ||
+            "default"
+
+    }));
+}
+
+/* =========================================================
+   GERİ YÜKLEME ONAYI
+========================================================= */
+
+function showRestoreConfirmation(
+    noteCount,
+    fileName
+) {
+
+    pendingAction =
+        "restore";
+
+
+    confirmModalTitle.textContent =
+        "Notları Geri Yükle";
+
+
+    confirmModalMessage.innerHTML = `
+
+        <div>
+            <strong>${noteCount} not</strong>
+            geri yüklenecek.
+        </div>
+
+        <div class="confirmation-note-title">
+            "${escapeHtml(fileName)}"
+        </div>
+
+        <div style="margin-top: 12px;">
+            Mevcut notlarınızın yerine
+            yedekteki notlar yüklenecek.
+            Devam etmek istiyor musunuz?
+        </div>
+
+    `;
+
+
+    confirmationIcon.className =
+        "bi bi-upload";
+
+
+    btnConfirmAction.className =
+        "btn btn-primary";
+
+
+    confirmModal.show();
+}
 
 /* =========================================================
    KART HTML
@@ -1276,6 +1434,12 @@ function executePendingAction() {
             executeDelete();
 
             break;
+
+        case "restore":
+
+            executeRestore();
+
+            break;
     }
 
 
@@ -1432,6 +1596,50 @@ function cancelNote() {
     noteModal.hide();
 }
 
+/* =========================================================
+   GERİ YÜKLE
+========================================================= */
+
+function executeRestore() {
+
+    if (
+        !Array.isArray(
+            pendingRestoreNotes
+        )
+    ) {
+
+        return;
+    }
+
+
+    notes =
+        pendingRestoreNotes;
+
+
+    saveNotesToStorage();
+
+
+    /*
+     * Manuel sıralamayı göstermek için
+     * sıralama seçimini manuel yap.
+     */
+
+    sortSelect.value =
+        "manual";
+
+
+    renderNotes();
+
+
+    pendingRestoreNotes =
+        null;
+
+
+    showToast(
+        `${notes.length} not başarıyla geri yüklendi.`,
+        "success"
+    );
+}
 
 /* =========================================================
    MODAL RESET
@@ -1966,6 +2174,145 @@ async function backupNotes() {
     showToast(
         `${notes.length} not başarıyla yedeklendi.`,
         "success"
+    );
+}
+
+/* =========================================================
+   YEDEKTEN GERİ YÜKLE
+========================================================= */
+
+function openRestoreFilePicker() {
+
+    restoreFileInput.value = "";
+
+    restoreFileInput.click();
+}
+
+
+/* =========================================================
+   YEDEK DOSYASINI OKU
+========================================================= */
+
+function handleRestoreFile(event) {
+
+    const file =
+        event.target.files[0];
+
+
+    if (!file) {
+        return;
+    }
+
+
+    /*
+     * Yalnızca JSON dosyalarını kabul et.
+     */
+
+    const isJson =
+        file.type === "application/json" ||
+        file.name.toLowerCase().endsWith(".json");
+
+
+    if (!isJson) {
+
+        showToast(
+            "Geçersiz dosya. Lütfen JSON yedek dosyası seçin.",
+            "danger"
+        );
+
+        return;
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function () {
+
+        try {
+
+            const importedData =
+                JSON.parse(
+                    reader.result
+                );
+
+
+            const importedNotes =
+                validateBackupData(
+                    importedData
+                );
+
+
+            if (!importedNotes) {
+
+                showToast(
+                    "Geçersiz not yedek dosyası.",
+                    "danger"
+                );
+
+                return;
+            }
+
+
+            if (
+                importedNotes.length === 0
+            ) {
+
+                showToast(
+                    "Yedek dosyasında hiç not bulunmuyor.",
+                    "danger"
+                );
+
+                return;
+            }
+
+
+            /*
+             * Geri yükleme için geçici olarak
+             * veriyi saklıyoruz.
+             */
+
+            pendingRestoreNotes =
+                importedNotes;
+
+
+            showRestoreConfirmation(
+                importedNotes.length,
+                file.name
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Yedek dosyası okunamadı:",
+                error
+            );
+
+
+            showToast(
+                "Yedek dosyası okunamadı.",
+                "danger"
+            );
+
+        }
+
+    };
+
+
+    reader.onerror = function () {
+
+        showToast(
+            "Dosya okunurken bir hata oluştu.",
+            "danger"
+        );
+
+    };
+
+
+    reader.readAsText(
+        file,
+        "UTF-8"
     );
 }
 
