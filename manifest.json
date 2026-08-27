@@ -1,23 +1,24 @@
 {
     "name": "Notlarım",
     "short_name": "Notlarım",
+    "id": "./index.html",
     "description": "Notlarınızı kolayca yönetin.",
     "lang": "tr-TR",
     "start_url": "./index.html",
     "scope": "./",
     "display": "standalone",
     "orientation": "any",
-    "theme_color": "#ffffff",
+    "theme_color": "#0d6efd",
     "background_color": "#f4f6f9",
     "icons": [
         {
-            "src": "./icons/icon-192.svg",
+            "src": "./icons/icon-192.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "./icons/icon-512.svg",
+            "src": "./icons/icon-512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"

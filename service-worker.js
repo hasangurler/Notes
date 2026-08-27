@@ -6,7 +6,7 @@
 ========================================================= */
 
 const CACHE_NAME =
-    "notlarim-cache-v1";
+    "notlarim-cache-v2";
 
 
 const APP_SHELL = [
@@ -20,9 +20,9 @@ const APP_SHELL = [
     "./css/fonts/bootstrap-icons.woff2",
     "./js/bootstrap.bundle.min.js",
     "./js/app.js",
-    "./Notes.png",
-    "./icons/icon-192.svg",
-    "./icons/icon-512.svg"
+    "./favicon.png",
+    "./icons/icon-192.png",
+    "./icons/icon-512.png"
 
 ];
 
